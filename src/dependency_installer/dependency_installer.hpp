@@ -1,0 +1,7 @@
+#ifndef DEPENDENCY_INSTALLER_HPP
+#define DEPENDENCY_INSTALLER_HPP
+
+class DependencyInstaller {
+};
+
+#endif // DEPENDENCY_INSTALLER_HPP
