@@ -13,28 +13,28 @@ std::string argumentTypeToString(ArgumentType argumentType) {
     }
 }
 
-Arguments argumentParser(int argc, char *argv[]) {
+Arguments argumentParser(int argc, const char *const argv[]) {
     Arguments arguments = Arguments();
 
-    int index = 1; // skip first argument, who is just path to current program
+    int index = 1; // skip first argument, which is just the path to the current program
     std::string lastArgument = "";
     while (index < argc) {
-        char *argument = argv[index];
+        const char *argument = argv[index];
         if (argument[0] == '-') {
             if (argument[1] == '-') { // long argument
                 std::string argumentWithoutDashes = std::string(argument).substr(2);
-                arguments.insert({argumentWithoutDashes, Argument{{}, ArgumentType::LONG}});
+                arguments.insert({argumentWithoutDashes, Argument{ArgumentType::LONG}});
                 lastArgument = argumentWithoutDashes;
             }
             else { // one or more short arguments
-                char *shortArgument = argument + 1;
-                std::string argumentWithoutDash = std::string(1, *shortArgument);
+                const char *shortArgument = argument + 1;
 
                 while (*shortArgument != '\0') {
-                    arguments.insert({argumentWithoutDash, Argument{{}, ArgumentType::SHORT}});
+                    std::string argumentWithoutDash = std::string(1, *shortArgument);
+                    arguments.insert({argumentWithoutDash, Argument{ArgumentType::SHORT}});
                     shortArgument++;
+                    lastArgument = argumentWithoutDash;
                 }
-                lastArgument = argumentWithoutDash;
             }
         }
         else {
@@ -45,7 +45,7 @@ Arguments argumentParser(int argc, char *argv[]) {
             }
             else {
                 // first argument, without dashes
-                arguments.insert({argument, Argument{{}, ArgumentType::NO_DASH_FIRST_ARGUMENT}});
+                arguments.insert({argument, Argument{ArgumentType::NO_DASH_FIRST_ARGUMENT}});
                 lastArgument = argument;
             }
         }

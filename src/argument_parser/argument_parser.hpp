@@ -19,12 +19,12 @@ enum class ArgumentType { SHORT, LONG, NO_DASH_FIRST_ARGUMENT };
 std::string argumentTypeToString(ArgumentType argumentType);
 
 struct Argument {
-    std::list<std::string> values;
     ArgumentType type;
+    std::list<std::string> values = {};
 };
 
 typedef std::unordered_map<std::string, Argument> Arguments;
 
-Arguments argumentParser(int argc, char *argv[]);
+Arguments argumentParser(int argc, const char * const argv[]);
 
 #endif // ARGUMENT_PARSER_HPP

@@ -7,13 +7,14 @@ TESTS_DIR=tests
 TESTS_LIB=cpp_tests/bin/cpp_tests_lib
 
 # Source files
-SRC=$(SRC_DIR)/main.cpp
+SRC_MAIN=$(SRC_DIR)/main.cpp
+OBJ_MAIN=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN)) 
 
 SUBDIRS=argument_parser dependency_installer dependency_solver project_runner
 SRC_SUBDIRS=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
-OBJ=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC)) $(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
+OBJ=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 
-TEST_SUBDIRS=
+TEST_SUBDIRS=argument_parser_tests
 SRC_TESTS=$(wildcard $(TESTS_DIR)/*.cpp) $(wildcard $(TESTS_DIR)/*/*.cpp)
 OBJ_TESTS=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_TEST_DIR)/%.o, $(SRC_TESTS))
 
@@ -32,12 +33,12 @@ all: $(MAIN)
 tests: $(TESTS)
 
 # Build everything except tests
-$(MAIN): $(OBJ)
+$(MAIN): $(OBJ) $(OBJ_MAIN)
 	@mkdir -p $(BIN_DIR)
 	$(CPP_C) $(CPP_FLAGS) -o $@ $^
 
 # Build the tests executable (tests + lib)
-$(TESTS): $(OBJ_TESTS) $(TESTS_LIB).a
+$(TESTS): $(OBJ) $(OBJ_TESTS) $(TESTS_LIB).a
 	@mkdir -p $(BIN_DIR)
 	$(CPP_C) $(CPP_FLAGS) -o $@ $^
 
