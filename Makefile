@@ -1,7 +1,8 @@
 CPP_C=g++
 CPP_FLAGS=-std=c++23 -Wall -g -MMD -MP
 BIN_DIR=bin
-OBJ_DIR=obj
+OBJ_DIR=obj/src
+OBJ_TEST_DIR=obj/test
 SRC_DIR=src
 TESTS_DIR=tests
 TESTS_LIB=cpp_tests/bin/cpp_tests_lib
@@ -10,12 +11,16 @@ TESTS_LIB=cpp_tests/bin/cpp_tests_lib
 SRC_MAIN=$(SRC_DIR)/main.cpp
 OBJ_MAIN=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN)) 
 
-SUBDIRS=argument_parser dependency_installer dependency_solver project_runner
+SUBDIRS=argument_parser dependency_installer dependency_solver project_runner models
 SRC_SUBDIRS=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 OBJ=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 
-TEST_SUBDIRS=argument_parser_tests
-SRC_TESTS=$(wildcard $(TESTS_DIR)/*.cpp) $(wildcard $(TESTS_DIR)/*/*.cpp)
+# Source files
+TEST_MAIN=$(TESTS_DIR)/main.cpp
+TEST_OBJ_MAIN=$(patsubst $(TESTS_DIR)/%.cpp, $(OBJ_TEST_DIR)/%.o, $(TEST_MAIN)) 
+
+TEST_SUBDIRS=argument_parser_tests dependency_solver_tests
+SRC_TESTS=$(foreach dir, $(TEST_SUBDIRS), $(wildcard $(TESTS_DIR)/$(dir)/*.cpp))
 OBJ_TESTS=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_TEST_DIR)/%.o, $(SRC_TESTS))
 
 # Executable targets
@@ -38,12 +43,17 @@ $(MAIN): $(OBJ) $(OBJ_MAIN)
 	$(CPP_C) $(CPP_FLAGS) -o $@ $^
 
 # Build the tests executable (tests + lib)
-$(TESTS): $(OBJ) $(OBJ_TESTS) $(TESTS_LIB).a
+$(TESTS): $(OBJ) $(OBJ_TESTS) $(TESTS_LIB).a $(TEST_OBJ_MAIN)
 	@mkdir -p $(BIN_DIR)
 	$(CPP_C) $(CPP_FLAGS) -o $@ $^
 
 # Rule for compiling all object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CPP_C) $(CPP_FLAGS) -c $< -o $@
+
+# Rule for compiling all object files
+$(OBJ_TEST_DIR)/%.o: $(TESTS_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CPP_C) $(CPP_FLAGS) -c $< -o $@
 
