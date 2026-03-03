@@ -1,24 +1,34 @@
 #include "dependency_solver.hpp"
 
 namespace {
-    size_t parseName(const std::string &line, size_t start) {
-        if (start >= line.size()) return 0;
-        for (size_t i = start; i < line.size(); i++) {
-            if (!std::isalnum(line[i]) && line[i] != '-' && line[i] != '_') return i - start;
+    size_t parseName(const std::string &text, size_t start) {
+        if (start >= text.size()) return 0;
+        for (size_t i = start; i < text.size(); i++) {
+            if (!std::isalnum(text[i]) && text[i] != '-' && text[i] != '_') return i - start;
         }
-        return line.size() - start;
+        return text.size() - start;
     }
 
-    size_t parseVersion(const std::string &line, size_t start) {
-        if (start >= line.size()) return 0;
+    size_t parseVersion(const std::string &text, size_t start) {
+        if (start >= text.size()) return 0;
         size_t i = start;
-        if (line[start] == '#') {
+        if (text[start] == '#') {
             i++;
         }
-        for (; i < line.size(); i++) {
-            if (!std::isalnum(line[i]) && line[i] != '-' && line[i] != '_') return i - start;
+        for (; i < text.size(); i++) {
+            if (!std::isalnum(text[i]) && text[i] != '-' && text[i] != '_') return i - start;
         }
-        return line.size() - start;
+        return text.size() - start;
+    }
+
+    size_t parseSpacesAndTabs(const std::string &text, size_t start) {
+        size_t i = start;
+        while (i < text.size()) {
+            char c = text[i];
+            if (c != ' ' && c != '\t') return i - start;
+            i++;
+        }
+        return text.size() - start;
     }
 
     void toLowerCase(std::string &value) {
@@ -58,6 +68,8 @@ Dependency *readDependency(std::string line) {
     git my-project #aa5f478
      */
 
+    size_t charIndex = 0;
+
     size_t providerNameLength = parseName(line, 0);
     if (providerNameLength == 0) {
         std::cerr << "Empty dependency line\n";
@@ -68,16 +80,42 @@ Dependency *readDependency(std::string line) {
         std::cerr << "Invalid provider '" << line.substr(0, providerNameLength) << "'\n";
         return nullptr;
     }
+    charIndex += providerNameLength;
 
-    size_t dependencyNameLength = parseName(line, providerNameLength + 1);
+    size_t spacesLength = parseSpacesAndTabs(line, charIndex);
+    if (spacesLength == 0) {
+        std::cerr << "Provider and dependency must be space or tab separated\n";
+        return nullptr;
+    }
+    charIndex += spacesLength;
+
+    size_t dependencyNameLength = parseName(line, charIndex);
     if (dependencyNameLength == 0) {
         std::cerr << "No dependency given\n";
         return nullptr;
     }
-    std::string dependencyName = line.substr(providerNameLength + 1, dependencyNameLength);
+    std::string dependencyName = line.substr(charIndex, dependencyNameLength);
+    charIndex += dependencyNameLength;
 
-    size_t versionLength = parseVersion(line, providerNameLength + dependencyNameLength + 2);
-    Version version = versionStringToVersion(line, providerNameLength + dependencyNameLength + 2, versionLength);
+    spacesLength = parseSpacesAndTabs(line, charIndex);
+    if (spacesLength == 0 && charIndex + spacesLength < line.size()) {
+        std::cerr << "Dependency and version must be space or tab separated\n";
+        return nullptr;
+    }
+    charIndex += spacesLength;
+
+    size_t versionLength = parseVersion(line, charIndex);
+    Version version = versionStringToVersion(line, charIndex, versionLength);
+    charIndex += versionLength;
+
+    spacesLength = parseSpacesAndTabs(line, charIndex);
+    if (charIndex + spacesLength < line.size()) {
+        std::cerr << "Unexpected argument after ";
+        if (version.type == VersionType::LAST) std::cerr << "dependency";
+        else std::cerr << "version";
+        std::cerr << "\n";
+        return nullptr;
+    }
 
     return new Dependency{provider, dependencyName, version};
 }
