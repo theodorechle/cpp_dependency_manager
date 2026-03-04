@@ -11,7 +11,7 @@ TESTS_LIB=cpp_tests/bin/cpp_tests_lib
 SRC_MAIN=$(SRC_DIR)/main.cpp
 OBJ_MAIN=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN)) 
 
-SUBDIRS=argument_parser dependency_installer dependency_solver project_runner models
+SUBDIRS=argument_parser dependency_installer dependency_solver project_runner models commands_executor help
 SRC_SUBDIRS=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 OBJ=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 

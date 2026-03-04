@@ -70,14 +70,23 @@ Dependency *readDependency(std::string line) {
 
     size_t charIndex = 0;
 
-    size_t providerNameLength = parseName(line, 0);
-    if (providerNameLength == 0) {
+    // possible characters at beginning of line
+    charIndex += parseSpacesAndTabs(line, charIndex);
+    if (charIndex == line.size()) {
         std::cerr << "Empty dependency line\n";
         return nullptr;
     }
-    Provider provider = providerNameToEnum(line.substr(0, providerNameLength));
+
+    size_t providerNameLength = parseName(line, charIndex);
+    if (providerNameLength == 0) {
+        std::cerr << "Invalid provider name, can't start with '" << line[charIndex] << "'\n";
+        return nullptr;
+    }
+
+    // provider
+    Provider provider = providerNameToEnum(line.substr(charIndex, providerNameLength));
     if (provider == Provider::INVALID) {
-        std::cerr << "Invalid provider '" << line.substr(0, providerNameLength) << "'\n";
+        std::cerr << "Invalid provider '" << line.substr(charIndex, providerNameLength) << "'\n";
         return nullptr;
     }
     charIndex += providerNameLength;
@@ -89,6 +98,7 @@ Dependency *readDependency(std::string line) {
     }
     charIndex += spacesLength;
 
+    // dependency
     size_t dependencyNameLength = parseName(line, charIndex);
     if (dependencyNameLength == 0) {
         std::cerr << "No dependency given\n";
@@ -104,10 +114,12 @@ Dependency *readDependency(std::string line) {
     }
     charIndex += spacesLength;
 
+    // version
     size_t versionLength = parseVersion(line, charIndex);
     Version version = versionStringToVersion(line, charIndex, versionLength);
     charIndex += versionLength;
 
+    // possible characters at end of line
     spacesLength = parseSpacesAndTabs(line, charIndex);
     if (charIndex + spacesLength < line.size()) {
         std::cerr << "Unexpected argument after ";
@@ -131,5 +143,9 @@ std::list<Dependency *> readDependenciesFromFile(const std::string &fileName) {
             if (dependency != nullptr) dependencies.push_back(dependency);
         }
     }
+    else {
+        std::cerr << "Couldn't open file '" << fileName << "'\n";
+    }
+
     return dependencies;
 }

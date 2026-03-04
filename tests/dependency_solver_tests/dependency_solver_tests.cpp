@@ -186,6 +186,12 @@ namespace dependencySolverTests {
         return test::booleanToResult(compareDependencies(&expected, dependency));
     }
 
+    test::Result testReadDependencyWithSpacesBeforeProvider() {
+        Dependency *dependency = readDependency("   git dependency #aaax54b");
+        Dependency expected = Dependency{Provider::GIT, "dependency", Version{VersionType::EXACT, "#aaax54b"}};
+        return test::booleanToResult(compareDependencies(&expected, dependency));
+    }
+
     test::Result testReadDependencyWithCharsAfterVersion() {
         Dependency *dependency = readDependency("git dependency #aaax54b dsfghj");
         if (dependency != nullptr) {
@@ -217,7 +223,17 @@ namespace dependencySolverTests {
     }
 
     test::Result testReadDependencyWithSpecialCharacterInVersion() {
-        Dependency *dependency = readDependency("git depend=ency #aaax~54b");
+        Dependency *dependency = readDependency("git dependency #aaax~54b");
+        if (dependency != nullptr) {
+            std::cerr << "dependency is not null but should be:\n";
+            displayDependency(dependency);
+            return test::Result::FAILURE;
+        }
+        return test::Result::SUCCESS;
+    }
+
+    test::Result testReadDependencyWithInvalidFirstProviderCharacter() {
+        Dependency *dependency = readDependency("#git dependency #aaax54b");
         if (dependency != nullptr) {
             std::cerr << "dependency is not null but should be:\n";
             displayDependency(dependency);
@@ -256,12 +272,14 @@ namespace dependencySolverTests {
         tests->addTest(testReadDependencyWithoutSpaceBetweenDependencyAndVersion, "read dependency without space between dependency and version");
         tests->addTest(testReadDependencyWithSpacesAfterVersion, "read dependency with spaces after version");
         tests->addTest(testReadDependencyWithSpacesAfterDependencyWithoutVersion, "read dependency with spaces after dependency without version");
-        tests->addTest(testReadDependencyWithCharsAfterVersion, "read dependency with chars after version");
+        tests->addTest(testReadDependencyWithSpacesBeforeProvider, "read dependency with spaces before provider");
         tests->endTestBlock();
         tests->beginTestBlock("special characters");
+        tests->addTest(testReadDependencyWithCharsAfterVersion, "read dependency with chars after version");
         tests->addTest(testReadDependencyWithSpecialCharacterInProvider, "read dependency with special character in dependency");
         tests->addTest(testReadDependencyWithSpecialCharacterInDependency, "read dependency with special character in provider");
         tests->addTest(testReadDependencyWithSpecialCharacterInVersion, "read dependency with special character in version");
+        tests->addTest(testReadDependencyWithInvalidFirstProviderCharacter, "read dependency with invalid first provider character");
         tests->endTestBlock();
         tests->endTestBlock();
         tests->endTestBlock();

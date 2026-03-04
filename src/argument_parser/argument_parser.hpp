@@ -1,9 +1,7 @@
 #ifndef ARGUMENT_PARSER_HPP
 #define ARGUMENT_PARSER_HPP
 
-#include <list>
-#include <string>
-#include <unordered_map>
+#include "../models/argument.hpp"
 
 class ArgumentException : public std::exception {
     std::string _message;
@@ -14,17 +12,6 @@ public:
     const char *what() const noexcept { return _message.c_str(); }
 };
 
-enum class ArgumentType { SHORT, LONG, NO_DASH_FIRST_ARGUMENT };
-
-std::string argumentTypeToString(ArgumentType argumentType);
-
-struct Argument {
-    ArgumentType type;
-    std::list<std::string> values = {};
-};
-
-typedef std::unordered_map<std::string, Argument> Arguments;
-
-Arguments argumentParser(int argc, const char * const argv[]);
+Arguments argumentParser(int argc, const char *const argv[]);
 
 #endif // ARGUMENT_PARSER_HPP
