@@ -1,5 +1,6 @@
 CPP_C=g++
 CPP_FLAGS=-std=c++23 -Wall -g -MMD -MP
+DEPENDENCIES=-lgit2
 BIN_DIR=bin
 OBJ_DIR=obj/src
 OBJ_TEST_DIR=obj/test
@@ -11,7 +12,7 @@ TESTS_LIB=cpp_tests/bin/cpp_tests_lib
 SRC_MAIN=$(SRC_DIR)/main.cpp
 OBJ_MAIN=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN)) 
 
-SUBDIRS=argument_parser dependency_installer dependency_solver project_runner models commands_executor help
+SUBDIRS=argument_parser dependency_installer dependency_solver project_runner models commands_executor help dependency_installer/abstract_installer dependency_installer/git_installer
 SRC_SUBDIRS=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 OBJ=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 
@@ -40,12 +41,12 @@ tests: $(TESTS)
 # Build everything except tests
 $(MAIN): $(OBJ) $(OBJ_MAIN)
 	@mkdir -p $(BIN_DIR)
-	$(CPP_C) $(CPP_FLAGS) -o $@ $^
+	$(CPP_C) $(CPP_FLAGS) -o $@ $^ $(DEPENDENCIES)
 
 # Build the tests executable (tests + lib)
 $(TESTS): $(OBJ) $(OBJ_TESTS) $(TESTS_LIB).a $(TEST_OBJ_MAIN)
 	@mkdir -p $(BIN_DIR)
-	$(CPP_C) $(CPP_FLAGS) -o $@ $^
+	$(CPP_C) $(CPP_FLAGS) -o $@ $^ $(DEPENDENCIES)
 
 # Rule for compiling all object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp

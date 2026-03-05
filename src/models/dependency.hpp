@@ -1,8 +1,8 @@
 #ifndef DEPENDENCY_HPP
 #define DEPENDENCY_HPP
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 enum class Provider { GIT, INVALID };
 
@@ -19,6 +19,8 @@ struct Version {
     VersionType type;
     std::string id;
 };
+
+std::string versionToString(Version version);
 
 struct Dependency {
     Provider provider;

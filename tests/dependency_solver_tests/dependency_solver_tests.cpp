@@ -242,6 +242,24 @@ namespace dependencySolverTests {
         return test::Result::SUCCESS;
     }
 
+    test::Result testReadDependencyWithColonInDependencyName() {
+        Dependency *dependency = readDependency("git https:dependency #aaax54b");
+        Dependency expected = Dependency{Provider::GIT, "https:dependency", Version{VersionType::EXACT, "#aaax54b"}};
+        return test::booleanToResult(compareDependencies(&expected, dependency));
+    }
+
+    test::Result testReadDependencyWithSlashInDependencyName() {
+        Dependency *dependency = readDependency("git https/dependency #aaax54b");
+        Dependency expected = Dependency{Provider::GIT, "https/dependency", Version{VersionType::EXACT, "#aaax54b"}};
+        return test::booleanToResult(compareDependencies(&expected, dependency));
+    }
+
+    test::Result testReadDependencyWithValidUrlInDependencyName() {
+        Dependency *dependency = readDependency("git https://my-domain.com/path/to/file #aaax54b");
+        Dependency expected = Dependency{Provider::GIT, "https://my-domain.com/path/to/file", Version{VersionType::EXACT, "#aaax54b"}};
+        return test::booleanToResult(compareDependencies(&expected, dependency));
+    }
+
     void testDependencySolver(test::Tests *tests) {
         tests->beginTestBlock("dependency solver");
         tests->addTest(testReadDependencyWithEmptyLine, "read dependency with empty line");
@@ -280,6 +298,9 @@ namespace dependencySolverTests {
         tests->addTest(testReadDependencyWithSpecialCharacterInDependency, "read dependency with special character in provider");
         tests->addTest(testReadDependencyWithSpecialCharacterInVersion, "read dependency with special character in version");
         tests->addTest(testReadDependencyWithInvalidFirstProviderCharacter, "read dependency with invalid first provider character");
+        tests->addTest(testReadDependencyWithColonInDependencyName, "read dependency with colon in dependency name");
+        tests->addTest(testReadDependencyWithSlashInDependencyName, "read dependency with slash in dependency name");
+        tests->addTest(testReadDependencyWithValidUrlInDependencyName, "read dependency with valid url in dependency name");
         tests->endTestBlock();
         tests->endTestBlock();
         tests->endTestBlock();

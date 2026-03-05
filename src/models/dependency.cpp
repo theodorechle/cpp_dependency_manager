@@ -19,3 +19,14 @@ std::string versionTypeToString(VersionType type) {
         throw std::runtime_error("Invalid version type");
     }
 }
+
+std::string versionToString(Version version) {
+    switch (version.type) {
+    case VersionType::EXACT:
+        return version.id;
+    case VersionType::LAST:
+        return "(last)";
+    default:
+        throw std::runtime_error("Invalid version type");
+    }
+}

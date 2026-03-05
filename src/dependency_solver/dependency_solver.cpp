@@ -1,10 +1,29 @@
 #include "dependency_solver.hpp"
 
 namespace {
-    size_t parseName(const std::string &text, size_t start) {
+    constexpr std::array<char, 5> allowedCharsInDependencyName = {'_', ':', '/', '-', '.'};
+
+    size_t parseProviderName(const std::string &text, size_t start) {
         if (start >= text.size()) return 0;
         for (size_t i = start; i < text.size(); i++) {
             if (!std::isalnum(text[i]) && text[i] != '-' && text[i] != '_') return i - start;
+        }
+        return text.size() - start;
+    }
+
+    size_t parseDependencyName(const std::string &text, size_t start) {
+        if (start >= text.size()) return 0;
+        for (size_t i = start; i < text.size(); i++) {
+            if (!std::isalnum(text[i])) {
+                bool found = false;
+                for (char c : allowedCharsInDependencyName) {
+                    if (text[i] == c) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) return i - start;
+            }
         }
         return text.size() - start;
     }
@@ -77,7 +96,7 @@ Dependency *readDependency(std::string line) {
         return nullptr;
     }
 
-    size_t providerNameLength = parseName(line, charIndex);
+    size_t providerNameLength = parseProviderName(line, charIndex);
     if (providerNameLength == 0) {
         std::cerr << "Invalid provider name, can't start with '" << line[charIndex] << "'\n";
         return nullptr;
@@ -99,7 +118,7 @@ Dependency *readDependency(std::string line) {
     charIndex += spacesLength;
 
     // dependency
-    size_t dependencyNameLength = parseName(line, charIndex);
+    size_t dependencyNameLength = parseDependencyName(line, charIndex);
     if (dependencyNameLength == 0) {
         std::cerr << "No dependency given\n";
         return nullptr;

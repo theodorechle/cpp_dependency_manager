@@ -2,6 +2,7 @@
 #define DEPENDENCY_SOLVER_HPP
 
 #include "../models/dependency.hpp"
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <list>

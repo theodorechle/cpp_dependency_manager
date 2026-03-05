@@ -3,7 +3,8 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
+    std::ostream &stream = std::cerr;
     Arguments arguments = argumentParser(argc, argv);
-    commandsExecutor(arguments);
+    commandsExecutor(arguments, stream);
     return EXIT_SUCCESS;
 }

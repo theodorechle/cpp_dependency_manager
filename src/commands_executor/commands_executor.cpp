@@ -1,8 +1,8 @@
 #include "commands_executor.hpp"
 
 namespace {
-    bool findArgument(const Arguments &arguments, std::list<std::pair<std::string, ArgumentType>> allowedArguments, int minValues, int maxValues,
-                      ArgumentValues *values) {
+    bool findArgument(const Arguments &arguments, std::list<std::pair<std::string, ArgumentType>> allowedArguments, ArgumentValues *values,
+                      int minValues = 0, int maxValues = std::numeric_limits<int>::max()) {
         for (std::pair<std::string, ArgumentType> allowedArgument : allowedArguments) {
             Arguments::const_iterator argumentsIterator = arguments.find(allowedArgument.first);
             if (argumentsIterator != arguments.cend() && argumentsIterator->second.type == allowedArgument.second) {
@@ -41,16 +41,31 @@ namespace {
     }
 } // namespace
 
-void commandsExecutor(Arguments arguments) {
+void commandsExecutor(Arguments arguments, std::ostream &stream) {
     ArgumentValues values = {};
     bool commandsExecuted = false;
 
-    if (findArgument(arguments, {{"file", ArgumentType::LONG}, {"f", ArgumentType::SHORT}}, 1, 1, &values)) {
-        readDependenciesFromFile(values.front());
+    if (findArgument(arguments, {{"file", ArgumentType::LONG}, {"f", ArgumentType::SHORT}}, &values, 1, 1)) {
+        std::list<Dependency *> dependencies = readDependenciesFromFile(values.front());
+        for (Dependency *dependency : dependencies) {
+            std::cerr << "installing dependency " << dependency->name << " with version " << versionToString(dependency->version) << " ...\n";
+            InstallerStatus status = DependencyInstaller().download(dependency->provider, dependency->name, dependency->version, stream);
+            switch (status) {
+            case InstallerStatus::DONE:
+                std::cerr << "done\n";
+                break;
+            case InstallerStatus::NO_NETWORK:
+                std::cerr << "no network, aborting installation\n";
+                return;
+            default:
+                break;
+            }
+        }
+
         commandsExecuted = true;
     }
 
-    if (findArgument(arguments, {{"help", ArgumentType::LONG}, {"h", ArgumentType::SHORT}}, 0, 0, &values)) {
+    if (findArgument(arguments, {{"help", ArgumentType::LONG}, {"h", ArgumentType::SHORT}}, &values, 0, 0)) {
         showHelp();
         commandsExecuted = true;
     }
