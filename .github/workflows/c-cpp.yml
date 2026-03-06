@@ -16,6 +16,9 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
+    
+    - name: Install libraries
+      run: sudo apt install libgit2-dev
 
     - name: Compile tests
       run: make -j tests BASH_COLORS=1
