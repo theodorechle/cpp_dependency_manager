@@ -1,15 +1,15 @@
 #ifndef ARGUMENT_HPP
 #define ARGUMENT_HPP
 
-#include <list>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 enum class ArgumentType { SHORT, LONG, NO_DASH_FIRST_ARGUMENT };
 
 std::string argumentTypeToString(ArgumentType argumentType);
 
-typedef std::list<std::string> ArgumentValues;
+typedef std::vector<std::string> ArgumentValues;
 
 struct Argument {
     ArgumentType type;

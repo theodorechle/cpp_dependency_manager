@@ -29,7 +29,7 @@ namespace argumentParserTests {
             else {
                 if (argument.second.values.size() != actualArgument->second.values.size()) equal = false;
                 else {
-                    std::list<std::string>::const_iterator actualValuesIterator = actualArgument->second.values.cbegin();
+                    std::vector<std::string>::const_iterator actualValuesIterator = actualArgument->second.values.cbegin();
                     for (const std::string &value : argument.second.values) {
                         if (value != *actualValuesIterator) {
                             equal = false;

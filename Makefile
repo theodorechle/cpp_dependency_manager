@@ -12,7 +12,10 @@ TESTS_LIB=cpp_tests/bin/cpp_tests_lib
 SRC_MAIN=$(SRC_DIR)/main.cpp
 OBJ_MAIN=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN)) 
 
-SUBDIRS=argument_parser dependency_installer dependency_solver project_runner models commands_executor help dependency_installer/abstract_installer dependency_installer/git_installer
+SUBDIRS=argument_parser dependency_solver project_runner models commands_executor help dependency_installer \
+dependency_installer/dependency_downloader/abstract_downloader dependency_installer/dependency_downloader/git_downloader \
+dependency_installer/dependency_builder/abstract_builder dependency_installer/dependency_builder/make_builder \
+dependency_installer/dependency_builder
 SRC_SUBDIRS=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 OBJ=$(foreach dir, $(SUBDIRS), $(wildcard $(SRC_DIR)/$(dir)/*.cpp))
 

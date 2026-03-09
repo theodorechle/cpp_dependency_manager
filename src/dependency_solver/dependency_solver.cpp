@@ -57,26 +57,26 @@ namespace {
             }
         }
     }
-
-    Provider providerNameToEnum(std::string providerName) {
-        toLowerCase(providerName);
-        if (providerName == "git") return Provider::GIT;
-        else return Provider::INVALID;
-    }
-
-    Version versionStringToVersion(std::string line, size_t start, size_t length) {
-        Version version = Version();
-        if (length == 0) {
-            version.type = VersionType::LAST;
-            version.id = "";
-        }
-        else {
-            version.id = line.substr(start, length);
-            version.type = VersionType::EXACT;
-        }
-        return version;
-    }
 } // namespace
+
+Provider providerNameToEnum(std::string providerName) {
+    toLowerCase(providerName);
+    if (providerName == "git") return Provider::GIT;
+    else return Provider::UNKNOWN;
+}
+
+Version versionStringToVersion(std::string line, size_t start, size_t length) {
+    Version version = Version();
+    if (length == 0) {
+        version.type = VersionType::LAST;
+        version.id = "";
+    }
+    else {
+        version.id = line.substr(start, length);
+        version.type = VersionType::EXACT;
+    }
+    return version;
+}
 
 Dependency *readDependency(std::string line) {
     /* dependency line should be like this:
@@ -104,7 +104,7 @@ Dependency *readDependency(std::string line) {
 
     // provider
     Provider provider = providerNameToEnum(line.substr(charIndex, providerNameLength));
-    if (provider == Provider::INVALID) {
+    if (provider == Provider::UNKNOWN) {
         std::cerr << "Invalid provider '" << line.substr(charIndex, providerNameLength) << "'\n";
         return nullptr;
     }

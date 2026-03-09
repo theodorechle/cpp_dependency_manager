@@ -49,14 +49,14 @@ void commandsExecutor(Arguments arguments, std::ostream &stream) {
         std::list<Dependency *> dependencies = readDependenciesFromFile(values.front());
         for (Dependency *dependency : dependencies) {
             std::cerr << "installing dependency " << dependency->name << " with version " << versionToString(dependency->version) << " ...\n";
-            InstallerStatus status = DependencyInstaller().download(dependency->provider, dependency->name, dependency->version, stream);
+            DependencyInstallerStatus status = DependencyInstaller().install(dependency->provider, dependency->name, dependency->version, stream);
             switch (status) {
-            case InstallerStatus::DONE:
+            case DependencyInstallerStatus::DONE:
                 std::cerr << "done\n";
                 break;
-            case InstallerStatus::NO_NETWORK:
-                std::cerr << "no network, aborting installation\n";
-                return;
+            case DependencyInstallerStatus::ERROR:
+                std::cerr << "error, aborting installation\n";
+                break;
             default:
                 break;
             }
@@ -67,6 +67,29 @@ void commandsExecutor(Arguments arguments, std::ostream &stream) {
 
     if (findArgument(arguments, {{"help", ArgumentType::LONG}, {"h", ArgumentType::SHORT}}, &values, 0, 0)) {
         showHelp();
+        commandsExecuted = true;
+    }
+
+    if (findArgument(arguments, {{"install", ArgumentType::LONG}, {"i", ArgumentType::SHORT}}, &values, 2, 3)) {
+        Version version;
+        if (values.size() == 2) {
+            version = versionStringToVersion("", 0, 0);
+        }
+        else {
+            version = versionStringToVersion(values[2], 0, values[2].size());
+        }
+
+        DependencyInstallerStatus status = DependencyInstaller().install(providerNameToEnum(values[0]), values[1], version, stream);
+        switch (status) {
+        case DependencyInstallerStatus::DONE:
+            std::cerr << "done\n";
+            break;
+        case DependencyInstallerStatus::ERROR:
+            std::cerr << "error, aborting installation\n";
+            return;
+        default:
+            break;
+        }
         commandsExecuted = true;
     }
 

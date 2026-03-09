@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-enum class Provider { GIT, INVALID };
+enum class Provider { GIT, UNKNOWN };
 
 std::string providerToString(Provider provider);
 
